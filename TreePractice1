@@ -1,0 +1,313 @@
+#include <iostream>
+#include <climits>
+#include <queue>
+using namespace std;
+
+class treeNode
+{
+   
+    public:
+     int data;
+    treeNode* left, *right, *nextRight;
+        treeNode(int val)
+        {
+            data = val;
+             left = right = nextRight = nullptr;
+        }
+};
+
+int height_old(treeNode* rootNode)
+{
+    if(rootNode == nullptr)
+        return -1;
+    int lHeight = height_old(rootNode->left);
+    int rHeight = height_old(rootNode->right);
+    
+    if(lHeight > rHeight)
+        return lHeight + 1;
+    else
+        return rHeight + 1;
+}
+
+int height(treeNode* node)
+{
+    // base case tree is empty
+    if (node == NULL)
+        return 0;
+ 
+    // If tree is not empty then height = 1 + max of left
+    // height and right heights
+    return 1 + max(height(node->left), height(node->right));
+}
+
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+int diameter(treeNode* rootNode)
+{
+    if(rootNode == nullptr)
+        return 0;
+    int lHeight = height(rootNode->left);
+    int rHeight = height(rootNode->right);
+    
+    int lDiameter = diameter(rootNode->left);
+    int rDiameter = diameter(rootNode->right);
+    
+    return (max(lHeight + rHeight + 1, max(lDiameter, rDiameter)));
+}
+
+bool isIdenticalTree(treeNode* Tree1, treeNode* Tree2)
+{
+    if(Tree1 == nullptr && Tree2 == nullptr)
+        return true;
+    if(Tree1 != nullptr && Tree2 != nullptr)
+    {
+        if(Tree1->data == Tree2->data)
+        {
+            return isIdenticalTree(Tree1->left, Tree2->left) && isIdenticalTree(Tree1->right, Tree2->right);
+        }
+        return false;
+    }
+    return false;
+}
+
+void  mirrorTree(treeNode* tNode)
+{
+    if(tNode == nullptr)
+        return;
+    mirrorTree(tNode->left);    
+    mirrorTree(tNode->right); 
+    
+    treeNode* temp = tNode->left;
+    tNode->left = tNode->right;
+    tNode->right = temp;
+}
+
+void inOrderTraversal(treeNode* rootNode)
+{
+    if(rootNode == nullptr)
+        return;
+    inOrderTraversal(rootNode->left);
+    cout << rootNode->data << " ";
+    inOrderTraversal(rootNode->right);
+}
+
+bool isMirror(treeNode* tNode1, treeNode* tNode2)
+{
+    if((tNode1 == nullptr)  && (tNode2 == nullptr))  
+        return true;
+    if(tNode1 != nullptr && tNode2 != nullptr)
+    {
+        if(tNode1->data == tNode2->data)
+        {
+            return isMirror(tNode1->left, tNode2->right) && isMirror(tNode1->right, tNode2->left);
+        }
+    }
+    return false;
+}
+
+bool isSymmetricalTree(treeNode* rootNode)
+{
+    return isMirror(rootNode, rootNode);
+}
+
+bool isBalanceTree(treeNode* rootNode)
+{
+    if(rootNode == nullptr)
+        return true;
+    int lHeight = height_old(rootNode->left);
+    int rHeight = height_old(rootNode->right);
+    
+    if(abs(lHeight - rHeight) <= 1 && isBalanceTree(rootNode->left)
+            && isBalanceTree(rootNode->right))
+    {
+        return true;
+    }
+    return false;
+}
+
+/* Returns true if a binary tree is a binary search tree */
+int isBST(treeNode* node, int min, int max)
+{
+	if (node == NULL)
+		return 1;
+
+	/* false if the max of the left is > than us */
+	if (node->left != NULL && node->left->data >= node->data && node->left->data <= min)
+		return 0;
+
+	/* false if the min of the right is <= than us */
+	if (node->right != NULL && node->right->data <= node->data && node->right->data >= max)
+		return 0;
+
+	/* false if, recursively, the left or right is not a BST
+	*/
+	if (!isBST(node->left, min, node->data - 1) || !isBST(node->right, node->data + 1, max))
+		return 0;
+
+	/* passing all that, it's a BST */
+	return 1;
+}
+
+treeNode* sortedArrayToBST(int arr[],
+                        int start, int end)
+{
+    /* Base Case */
+    if (start > end)
+    return NULL;
+ 
+    /* Get the middle element and make it root */
+    int mid = (start + end)/2;
+    cout << "create node for : " << mid<< " ";
+    treeNode *root = new treeNode(arr[mid]);
+ 
+    /* Recursively construct the left subtree
+    and make it left child of root */
+    root->left = sortedArrayToBST(arr, start,
+                                    mid - 1);
+ 
+    /* Recursively construct the right subtree
+    and make it right child of root */
+    root->right = sortedArrayToBST(arr, mid + 1, end);
+ 
+    return root;
+}
+// This code is contributed by shubhamsingh10
+
+/*void connect(treeNode* root)
+{
+    if(root == nullptr)
+        return;
+    queue<treeNode*> cur_queue;
+    
+    cur_queue.push(root);
+    treeNode* prev = nullptr;
+    while(cur_queue.size() > 0)
+    {
+        treeNode* temp = cur_queue.front();
+        cur_queue.pop();
+        if(temp->left != nullptr)
+            cur_queue.push(temp->left);
+        if(temp->right != nullptr)
+            cur_queue.push(temp->right);
+        if(prev != nullptr)
+            prev->nextRight = temp;
+        prev = temp;
+    }
+}*/
+
+void connect(treeNode* root)
+    {
+       //Base condition
+       if(root==NULL)
+        return;
+       // Create an empty queue like level order traversal
+       queue<treeNode*> q;
+       q.push(root);
+       while(!q.empty()){
+         // size indicates no. of nodes at current level
+           int size=q.size();
+         // for keeping track of previous node
+           treeNode* prev=NULL;
+           while(size--){
+               treeNode* temp=q.front();
+               q.pop();
+              
+               if(temp->left)
+                q.push(temp->left);
+                             
+               if(temp->right)
+                q.push(temp->right);
+               
+               if(prev!=NULL)
+                prev->nextRight=temp;
+               prev=temp;
+           }
+           prev->nextRight=NULL;
+       }
+    }
+
+int main()
+{
+    int arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    treeNode *root_arr = sortedArrayToBST(arr, 0, n-1);
+    cout << "Sorted Array to BST = " << endl;
+    inOrderTraversal(root_arr);
+    cout << endl;
+    connect(root_arr);
+    cout << "print level order traversal of tree : " << endl;
+    cout << "nextRight of " << root_arr->data << " is "
+         << (root_arr->nextRight ? root_arr->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->left->data << " is "
+         << (root_arr->left->nextRight ? root_arr->left->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->right->data << " is "
+         << (root_arr->right->nextRight ? root_arr->right->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->left->left->data << " is "
+         << (root_arr->left->left->nextRight ? root_arr->left->left->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->left->right->data << " is "
+         << (root_arr->left->right->nextRight ? root_arr->left->right->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->right->left->data << " is "
+         << (root_arr->right->left->nextRight ? root_arr->right->left->nextRight->data : -1) << endl;
+    cout << "nextRight of " << root_arr->right->right->data << " is "
+         << (root_arr->right->right->nextRight ? root_arr->right->right->nextRight->data : -1) << endl;
+    if(root_arr->left->left->left != nullptr)
+        cout << "nextRight of " << root_arr->left->left->left->data << " is "
+         << (root_arr->left->left->left->nextRight ? root_arr->left->left->left->nextRight->data : -1) << endl;
+    if(root_arr->left->left->right != nullptr)
+    cout << "nextRight of " << root_arr->left->left->right->data << " is "
+         << (root_arr->left->left->right->nextRight ? root_arr->left->left->right->nextRight->data : -1) << endl;
+    if(root_arr->left->right->left != nullptr)
+        cout << "nextRight of " << root_arr->left->right->left->data << " is "
+         << (root_arr->left->right->left->nextRight ? root_arr->left->right->left->nextRight->data : -1) << endl;
+    if(root_arr->left->right->right != nullptr)
+        cout << "nextRight of " << root_arr->left->right->right->data << " is "
+         << (root_arr->left->right->right->nextRight ? root_arr->left->right->right->nextRight->data : -1) << endl;
+    /*treeNode *tNode = new treeNode(1);
+    tNode->left = new  treeNode(2);
+    tNode->right = new  treeNode(3);
+    tNode->right->right = new  treeNode(4);
+    tNode->right->right->left = new treeNode(5);*/
+    
+    treeNode *tNode = new treeNode(1);
+    tNode->left = new  treeNode(2);
+    tNode->right = new  treeNode(3);
+    tNode->left->left = new  treeNode(4);
+    tNode->left->right = new treeNode(5);
+    
+    treeNode *tNode1 = new treeNode(1);
+    tNode1->left = new  treeNode(2);
+    tNode1->right = new  treeNode(3);
+    tNode1->left->left = new  treeNode(4);
+    tNode1->left->right = new treeNode(5);
+    
+    treeNode *tNode2 = new treeNode(1);
+    tNode2->left = new  treeNode(2);
+    tNode2->right = new  treeNode(2);
+    tNode2->left->left = new  treeNode(3);
+    tNode2->left->right = new treeNode(4);
+    tNode2->right->left = new treeNode(4);
+    tNode2->right->right = new treeNode(3);
+    tNode2->right->right->left = new treeNode(5);
+    tNode2->right->right->left->right = new treeNode(6);
+    
+    treeNode *tNode3 = new treeNode(5);
+    tNode3->left = new  treeNode(3);
+    tNode3->right = new  treeNode(6);
+    tNode3->left->left = new  treeNode(2);
+    tNode3->left->right = new  treeNode(4);
+    cout << " is BST Tree = " << isBST(tNode3, INT_MIN, INT_MAX) << endl;
+    cout << " isBalanceTree = " << isBalanceTree(tNode2) << endl;
+    cout << " Tree symmetrical = " << isSymmetricalTree(tNode2) << endl;
+    
+    cout << " check Tree identical = " << isIdenticalTree(tNode, tNode1) << endl;
+    cout << "Given tree traversal = ";
+    inOrderTraversal(tNode);
+    mirrorTree(tNode);
+    cout << " mirror Tree traversal = ";
+    inOrderTraversal(tNode);
+    cout << "old height of tree = " << height_old(tNode) << endl;
+    cout << "height of tree = " << height(tNode) << endl;
+    cout << "diameter of tree = " << diameter(tNode) << endl;
+}
